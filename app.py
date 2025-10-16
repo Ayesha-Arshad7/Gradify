@@ -3,23 +3,25 @@ import streamlit as st
 st.set_page_config(page_title="Gradify", page_icon="🎓", layout="centered")
 
 st.title("🎓 Gradify – GPA & CGPA Calculator")
+st.write("Enter your marks and credit hours for each subject below:")
 
-st.write("Enter your marks for each subject to calculate your GPA and CGPA.")
-
-# Number of subjects
-num_subjects = st.number_input("Enter number of subjects:", min_value=1, max_value=20, step=1)
+# Input: number of subjects
+num_subjects = st.number_input("Number of subjects:", min_value=1, max_value=20, step=1)
 
 marks = []
 credits = []
 
-# Get marks and credits for each subject
+# Take marks and credit hours for each subject
 for i in range(num_subjects):
-    st.subheader(f"Subject {i+1}")
-    mark = st.number_input(f"Enter marks for Subject {i+1} (0–100):", min_value=0, max_value=100, step=1)
-    credit = st.number_input(f"Enter credit hours for Subject {i+1}:", min_value=1.0, max_value=4.0, step=0.5)
+    col1, col2 = st.columns(2)
+    with col1:
+        mark = st.number_input(f"Marks for Subject {i+1} (0–100):", min_value=0, max_value=100, step=1, key=f"mark{i}")
+    with col2:
+        credit = st.number_input(f"Credit Hours for Subject {i+1}:", min_value=1.0, max_value=4.0, step=0.5, key=f"credit{i}")
     marks.append(mark)
     credits.append(credit)
 
+# Grade point conversion
 def grade_point(mark):
     if mark >= 85:
         return 4.0
@@ -40,20 +42,24 @@ def grade_point(mark):
     else:
         return 0.0
 
+# Button to calculate GPA
 if st.button("Calculate GPA & CGPA"):
     total_points = sum([grade_point(m) * c for m, c in zip(marks, credits)])
     total_credits = sum(credits)
-    gpa = total_points / total_credits if total_credits > 0 else 0
+    gpa = total_points / total_credits if total_credits > 0 else 0.0
 
-    st.success(f"📘 Your GPA for this semester is **{gpa:.2f}**")
+    st.success(f"📘 GPA for this semester: **{gpa:.2f}**")
 
-    # CGPA calculation
-    st.subheader("Enter previous semester information to calculate CGPA")
+    st.write("---")
+    st.subheader("CGPA Calculation")
+
     prev_cgpa = st.number_input("Previous CGPA:", min_value=0.0, max_value=4.0, step=0.01)
-    prev_credits = st.number_input("Total credit hours completed before this semester:", min_value=0.0, step=1.0)
+    prev_credits = st.number_input("Total completed credit hours before this semester:", min_value=0.0, step=1.0)
 
-    total_quality_points = prev_cgpa * prev_credits + gpa * total_credits
-    total_combined_credits = prev_credits + total_credits
-    cgpa = total_quality_points / total_combined_credits if total_combined_credits > 0 else 0
-
-    st.success(f"🎯 Your updated CGPA is **{cgpa:.2f}**")
+    if prev_credits > 0:
+        total_quality_points = prev_cgpa * prev_credits + gpa * total_credits
+        total_combined_credits = prev_credits + total_credits
+        cgpa = total_quality_points / total_combined_credits if total_combined_credits > 0 else 0.0
+        st.success(f"🎯 Updated CGPA: **{cgpa:.2f}**")
+    else:
+        st.info("Enter your previous CGPA and total credit hours to calculate your updated CGPA.")
