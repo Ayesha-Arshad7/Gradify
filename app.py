@@ -11,7 +11,7 @@ num_subjects = st.number_input("Number of subjects:", min_value=1, max_value=20,
 marks = []
 credits = []
 
-# Take marks and credit hours for each subject
+# Get marks and credit hours for each subject
 for i in range(num_subjects):
     col1, col2 = st.columns(2)
     with col1:
@@ -42,24 +42,26 @@ def grade_point(mark):
     else:
         return 0.0
 
-# Button to calculate GPA
+st.divider()
+st.subheader("📘 Previous Academic Record")
+prev_cgpa = st.number_input("Enter your previous CGPA:", min_value=0.0, max_value=4.0, step=0.01)
+prev_credits = st.number_input("Enter total completed credit hours before this semester:", min_value=0.0, step=1.0)
+
+st.divider()
+
 if st.button("Calculate GPA & CGPA"):
+    # GPA Calculation
     total_points = sum([grade_point(m) * c for m, c in zip(marks, credits)])
     total_credits = sum(credits)
     gpa = total_points / total_credits if total_credits > 0 else 0.0
 
-    st.success(f"📘 GPA for this semester: **{gpa:.2f}**")
+    st.success(f"✅ GPA for this semester: **{gpa:.2f}**")
 
-    st.write("---")
-    st.subheader("CGPA Calculation")
-
-    prev_cgpa = st.number_input("Previous CGPA:", min_value=0.0, max_value=4.0, step=0.01)
-    prev_credits = st.number_input("Total completed credit hours before this semester:", min_value=0.0, step=1.0)
-
+    # CGPA Calculation
     if prev_credits > 0:
-        total_quality_points = prev_cgpa * prev_credits + gpa * total_credits
+        total_quality_points = (prev_cgpa * prev_credits) + (gpa * total_credits)
         total_combined_credits = prev_credits + total_credits
-        cgpa = total_quality_points / total_combined_credits if total_combined_credits > 0 else 0.0
+        cgpa = total_quality_points / total_combined_credits
         st.success(f"🎯 Updated CGPA: **{cgpa:.2f}**")
     else:
         st.info("Enter your previous CGPA and total credit hours to calculate your updated CGPA.")
